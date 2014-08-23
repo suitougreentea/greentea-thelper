@@ -1,3 +1,4 @@
+package io.github.suitougreentea.thelper;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
