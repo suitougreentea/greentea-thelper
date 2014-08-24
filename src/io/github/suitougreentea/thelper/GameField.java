@@ -55,17 +55,34 @@ public class GameField {
     
     public void moveRight(){
 	currentMinoX ++;
+	if(checkHit()) currentMinoX--;
     }
 
     public void moveLeft(){
 	currentMinoX --;
+	if(checkHit()) currentMinoX++;
     }
 
     public void moveUp(){
 	currentMinoY ++;
+	if(checkHit()) currentMinoY--;
     }
 
     public void moveDown(){
 	currentMinoY --;
+	if(checkHit()) currentMinoY++;
+    }
+    
+    public boolean checkHit(){
+	for(int iy=0;iy<6;iy++){
+	    for(int ix=0;ix<6;ix++){
+		int jx = ix + currentMinoX;
+		int jy = iy + currentMinoY;
+		if(currentMino.getBlock(ix, iy) != null){
+		    if(jx < 0 || 10 <= jx || jy < 0 || field.size() <= jy || getFieldBlock(jx, jy) != null) return true;
+		}
+	    }
+	}
+	return false;
     }
 }
