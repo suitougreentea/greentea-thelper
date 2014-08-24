@@ -11,6 +11,14 @@ public class CommonRenderHelper {
 	}
     }
     
+    public static void drawMino(Mino mino, int x, int y) {
+	for(int iy=0;iy<6;iy++){
+	    for(int ix=0;ix<6;ix++){
+		drawBlock(mino.getBlock(ix, iy), (ix + x) * 20, -(iy + y) * 20 + 380, 0);
+	    }
+	}
+    }
+
     public static void drawBlock(Block block, int x, int y, int size){
 	if(block == null) return;
 	int sbx = block.getId() % 16;
@@ -23,4 +31,5 @@ public class CommonRenderHelper {
 	    break;
 	}
     }
+
 }

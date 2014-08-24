@@ -6,6 +6,7 @@ import io.github.suitougreentea.thelper.Resource;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -43,8 +44,12 @@ public class StatePlaying extends BasicGameState {
     @Override
     public void update(GameContainer gc, StateBasedGame sbg, int delta)
 	    throws SlickException {
-	// TODO Auto-generated method stub
-
+	Input i = gc.getInput();
+	if(i.isKeyPressed(Input.KEY_LEFT)) field.moveLeft();
+	if(i.isKeyPressed(Input.KEY_RIGHT)) field.moveRight();
+	if(i.isKeyPressed(Input.KEY_DOWN)) field.moveDown();
+	if(i.isKeyPressed(Input.KEY_UP)) field.moveUp();
+	i.clearKeyPressedRecord();
     }
 
     @Override
@@ -56,6 +61,7 @@ public class StatePlaying extends BasicGameState {
 	g.translate(120, 100);
 	g.pushTransform();
 	CommonRenderHelper.drawField(field.getField());
+	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX(), field.getCurrentMinoY());
 	g.popTransform();
     }
 	    
