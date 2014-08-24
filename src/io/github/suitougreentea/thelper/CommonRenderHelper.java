@@ -2,7 +2,11 @@ package io.github.suitougreentea.thelper;
 
 import java.util.List;
 
+import org.newdawn.slick.Color;
+
 public class CommonRenderHelper {
+    private static int[] blockSize = {20, 16, 14, 12};
+    
     public static void drawField(List<Block[]> field){
 	for(int iy=0;iy<20;iy++){
 	    for(int ix=0;ix<10;ix++){
@@ -11,25 +15,30 @@ public class CommonRenderHelper {
 	}
     }
     
-    public static void drawMino(Mino mino, int x, int y) {
+    public static void drawMino(Mino mino, int x, int y, int size) {
+	drawMino(mino, x, y, size, 1f);
+    }
+    
+    public static void drawMino(Mino mino, int x, int y, int size, float transparency) {
+	int s = blockSize[size];
 	for(int iy=0;iy<6;iy++){
 	    for(int ix=0;ix<6;ix++){
-		drawBlock(mino.getBlock(ix, iy), (ix + x) * 20, -(iy + y) * 20 + 380, 0);
+		drawBlock(mino.getBlock(ix, iy), (ix + x) * s, -(iy + y) * s + 380, size, transparency);
 	    }
 	}
     }
 
     public static void drawBlock(Block block, int x, int y, int size){
+	drawBlock(block, x, y, size, 1f);
+    }
+    
+    public static void drawBlock(Block block, int x, int y, int size, float transparency){
 	if(block == null) return;
 	int sbx = block.getId() % 16;
 	int sby = block.getId() / 16;
-	switch(size){
-	case 0:
-	    int sx = sbx * 20;
-	    int sy = sby * 20;
-	    Resource.block.draw(x, y, x+20, y+20, sx, sy, sx+20, sy+20);
-	    break;
-	}
+	int s = blockSize[size];
+	int sx = sbx * s;
+	int sy = sby * s;
+	Resource.blockDefault[size].draw(x, y, x+s, y+s, sx, sy, sx+s, sy+s, new Color(1f, 1f, 1f, transparency));
     }
-
 }

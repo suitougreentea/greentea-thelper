@@ -8,11 +8,12 @@ public class Mino {
     public static final int MINO_S = 4; 
     public static final int MINO_T = 5; 
     public static final int MINO_Z = 6; 
-    
+    private int minoId; 
     private Block[][] block;
     private int rotationState;
 
     public Mino(int minoId, int blockId){
+	this.minoId = minoId;
 	block = new Block[6][6];
 	for(int iy=0;iy<6;iy++){
 	    for(int ix=0;ix<6;ix++){
@@ -29,6 +30,10 @@ public class Mino {
 	return rotationState;
     }
     
+    public int getMinoId(){
+	return minoId;
+    }
+    
     public void rotateCW(){
 	// Rotate array CCW
 	Block[][] result = new Block[6][6];
@@ -38,6 +43,7 @@ public class Mino {
 	    }
 	}
 	block = result;
+	rotationState = (rotationState + 1) % 4;
     }
 
     public void rotateCCW(){
@@ -49,6 +55,7 @@ public class Mino {
 	    }
 	}
 	block = result;
+	rotationState = (rotationState + 3) % 4;
     }
     
     // All mino array are vertically flipped (because younger index is bottom, older index is top)

@@ -5,14 +5,22 @@ import org.newdawn.slick.SlickException;
 
 public class Resource {
     public static Image field;
-    public static Image block;
+    public static Image[] blockDefault;
     
     public static void Load() {
-	field = LoadImage("res/field.png");
-	block = LoadImage("res/block/default.png");
+	field = loadImage("res/field.png");
+	blockDefault = loadBlockImage("default");
+    }
+   
+    public static Image[] loadBlockImage(String name) {
+	Image[] result = new Image[4];
+	for(int i=0;i<4;i++){
+	    result[i] = loadImage("res/block/" + name + "-" + i + ".png");
+	}
+	return result;
     }
     
-    public static Image LoadImage(String path) {
+    public static Image loadImage(String path) {
 	try {
 	    return new Image(path);
 	} catch (SlickException e) {

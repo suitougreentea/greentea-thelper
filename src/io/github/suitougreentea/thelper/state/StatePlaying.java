@@ -4,6 +4,7 @@ import io.github.suitougreentea.thelper.CommonRenderHelper;
 import io.github.suitougreentea.thelper.GameField;
 import io.github.suitougreentea.thelper.Resource;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -48,7 +49,7 @@ public class StatePlaying extends BasicGameState {
 	if(i.isKeyPressed(Input.KEY_LEFT)) field.moveLeft();
 	if(i.isKeyPressed(Input.KEY_RIGHT)) field.moveRight();
 	if(i.isKeyPressed(Input.KEY_DOWN)) field.moveDown();
-	if(i.isKeyPressed(Input.KEY_UP)) field.moveUp();
+	if(i.isKeyPressed(Input.KEY_UP)) field.hardDrop();
 	if(i.isKeyPressed(Input.KEY_X)) field.rotateCW();
 	if(i.isKeyPressed(Input.KEY_Z)) field.rotateCCW();
 	i.clearKeyPressedRecord();
@@ -60,10 +61,12 @@ public class StatePlaying extends BasicGameState {
     }
    
     private void drawField(GameField field, Graphics g){
-	g.translate(120, 100);
+	g.translate(100, 100);
 	g.pushTransform();
 	CommonRenderHelper.drawField(field.getField());
-	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX(), field.getCurrentMinoY());
+	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX(), field.getCurrentMinoY(), 0);
+	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX(), field.getGhostY(), 0, 0.5f);
+	CommonRenderHelper.drawMino(field.getNextMino(1), 0, 0, 1);
 	g.popTransform();
     }
 	    
