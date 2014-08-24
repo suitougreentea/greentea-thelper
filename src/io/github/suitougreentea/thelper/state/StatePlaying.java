@@ -49,6 +49,8 @@ public class StatePlaying extends BasicGameState {
 	if(i.isKeyPressed(Input.KEY_RIGHT)) field.moveRight();
 	if(i.isKeyPressed(Input.KEY_DOWN)) field.moveDown();
 	if(i.isKeyPressed(Input.KEY_UP)) field.moveUp();
+	if(i.isKeyPressed(Input.KEY_X)) field.rotateCW();
+	if(i.isKeyPressed(Input.KEY_Z)) field.rotateCCW();
 	i.clearKeyPressedRecord();
     }
 

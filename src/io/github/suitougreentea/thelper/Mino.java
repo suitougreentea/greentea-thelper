@@ -29,6 +29,28 @@ public class Mino {
 	return rotationState;
     }
     
+    public void rotateCW(){
+	// Rotate array CCW
+	Block[][] result = new Block[6][6];
+	for(int iy=0;iy<6;iy++){
+	    for(int ix=0;ix<6;ix++){
+		result[iy][ix] = block[ix][5 - iy];
+	    }
+	}
+	block = result;
+    }
+
+    public void rotateCCW(){
+	// Rotate array CW
+	Block[][] result = new Block[6][6];
+	for(int iy=0;iy<6;iy++){
+	    for(int ix=0;ix<6;ix++){
+		result[iy][ix] = block[5 - ix][iy];
+	    }
+	}
+	block = result;
+    }
+    
     // All mino array are vertically flipped (because younger index is bottom, older index is top)
     private static boolean[][][] minoList = {
 	{ //I

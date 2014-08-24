@@ -14,7 +14,7 @@ public class GameField {
 	for(int i=0;i<defaultHeight;i++) field.add(new Block[10]);
 	
 	setFieldBlock(0, 0, new Block(1));
-	currentMino = new Mino(0,1);
+	currentMino = new Mino(5,1);
     }
 
     public List<Block[]> getField() {
@@ -71,6 +71,14 @@ public class GameField {
     public void moveDown(){
 	currentMinoY --;
 	if(checkHit()) currentMinoY++;
+    }
+    
+    public void rotateCW(){
+	currentMino.rotateCW();
+    }
+
+    public void rotateCCW(){
+	currentMino.rotateCCW();
     }
     
     public boolean checkHit(){
