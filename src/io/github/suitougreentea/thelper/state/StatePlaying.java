@@ -2,6 +2,7 @@ package io.github.suitougreentea.thelper.state;
 
 import io.github.suitougreentea.thelper.CommonRenderHelper;
 import io.github.suitougreentea.thelper.GameField;
+import io.github.suitougreentea.thelper.Mino;
 import io.github.suitougreentea.thelper.Resource;
 
 import org.newdawn.slick.Color;
@@ -40,6 +41,9 @@ public class StatePlaying extends BasicGameState {
 	Resource.field.draw();
 	
 	drawField(field, g);
+	for(int i=0;i<6;i++){
+	    drawNext(i);
+	}
     }
 
     @Override
@@ -61,13 +65,18 @@ public class StatePlaying extends BasicGameState {
     }
    
     private void drawField(GameField field, Graphics g){
-	g.translate(100, 100);
 	g.pushTransform();
+	g.translate(100, 100);
 	CommonRenderHelper.drawField(field.getField());
-	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX(), field.getCurrentMinoY(), 0);
-	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX(), field.getGhostY(), 0, 0.5f);
-	CommonRenderHelper.drawMino(field.getNextMino(1), 0, 0, 1);
+	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX() * 20, -field.getCurrentMinoY() * 20 + 380, 0);
+	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX() * 20, -field.getGhostY() * 20 + 380, 0, 0.5f);
 	g.popTransform();
+    }
+    
+    private void drawNext(int index){
+	Mino mino = field.getNextMino(index);
+	/* offset */
+	CommonRenderHelper.drawMino(mino, 0, 48 * index + 48, 1);
     }
 	    
 }

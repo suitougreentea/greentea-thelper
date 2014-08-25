@@ -12,7 +12,7 @@ public class Mino {
     private Block[][] block;
     private int rotationState;
 
-    public Mino(int minoId, int blockId){
+    public Mino(int minoId, int blockId, int spawnRotationState){
 	this.minoId = minoId;
 	block = new Block[6][6];
 	for(int iy=0;iy<6;iy++){
@@ -20,6 +20,8 @@ public class Mino {
 		if(minoList[minoId][iy][ix]) block[iy][ix] = new Block(blockId);
 	    }
 	}
+	this.rotationState = spawnRotationState;
+	for(int i=0;i<rotationState;i++) rotateCW();
     }
     
     public Block getBlock(int x, int y){

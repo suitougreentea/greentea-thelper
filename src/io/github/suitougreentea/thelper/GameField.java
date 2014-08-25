@@ -1,5 +1,7 @@
 package io.github.suitougreentea.thelper;
 
+import io.github.suitougreentea.thelper.state.MinoRuleStandard;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -13,13 +15,17 @@ public class GameField {
     private int currentMinoX, currentMinoY;
     private RotationSpinRuleStandard rotationSpinRule = new RotationSpinRuleStandard();
     private BagRandomizer7 randomizer = new BagRandomizer7(new Random());
+    private MinoRuleStandard minoRule = new MinoRuleStandard();
     
     public GameField(int defaultHeight){
 	if(defaultHeight < 20) defaultHeight = 20;
 	for(int i=0;i<defaultHeight;i++) field.add(new Block[10]);
 	
 	nextMino = new Mino[6];
-	for(int i=0;i<6;i++) nextMino[i] = new Mino(randomizer.next(), 8);
+	for(int i=0;i<6;i++) {
+	    int minoId = randomizer.next();
+	    nextMino[i] = new Mino(minoId, minoRule.getColor(minoId), minoRule.getSpawnRotationState(minoId));
+	}
 	newMino();
     }
 
@@ -130,11 +136,13 @@ public class GameField {
     }
     
     public void newMino(){
-	currentMinoX = 3;
-	currentMinoY = 15;
 	currentMino = nextMino[0];
+	int minoId = currentMino.getMinoId();
+	currentMinoX = minoRule.getSpawnPositionX(minoId);
+	currentMinoY = minoRule.getSpawnPositionY(minoId);
 	for(int i=0;i<5;i++) nextMino[i] = nextMino[i+1];
-	nextMino[5] = new Mino(randomizer.next(), 8);
+	int newMinoId = randomizer.next();
+	nextMino[5] = new Mino(newMinoId, minoRule.getColor(newMinoId), minoRule.getSpawnRotationState(newMinoId));
     }
     
     public Mino getNextMino(int index){

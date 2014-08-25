@@ -23,7 +23,7 @@ public class CommonRenderHelper {
 	int s = blockSize[size];
 	for(int iy=0;iy<6;iy++){
 	    for(int ix=0;ix<6;ix++){
-		drawBlock(mino.getBlock(ix, iy), (ix + x) * s, -(iy + y) * s + 380, size, transparency);
+		drawBlock(mino.getBlock(ix, iy), x + ix * s, y - iy * s, size, transparency);
 	    }
 	}
     }
