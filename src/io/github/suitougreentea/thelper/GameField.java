@@ -16,6 +16,7 @@ public class GameField {
     private RotationSpinRuleStandard rotationSpinRule = new RotationSpinRuleStandard();
     private BagRandomizer7 randomizer = new BagRandomizer7(new Random());
     private MinoRuleStandard minoRule = new MinoRuleStandard();
+    private List<Integer> eraseLineList;
     
     public GameField(int defaultHeight){
 	if(defaultHeight < 20) defaultHeight = 20;
@@ -153,5 +154,50 @@ public class GameField {
     
     public Mino getNextMino(int index){
 	return nextMino[index];
+    }
+    
+    public List<Integer> judgeEraseLine(){
+	eraseLineList = new ArrayList<Integer>();
+	for(int iy=0;iy<field.size();iy++){
+	    int num = 0;
+	    for(int ix=0;ix<10;ix++){
+		if(getFieldBlock(ix, iy) != null) num++;
+	    }
+	    if(num == 10) {
+		eraseLineList.add(iy);
+	    }
+	}
+	return eraseLineList;
+    }
+    
+    // Must call judgeEraseLine() before calling eraseLine()
+    public void eraseLine(){
+	for(int iy=0;iy<eraseLineList.size();iy++){
+	    for(int ix=0;ix<10;ix++){
+		setFieldBlock(ix, eraseLineList.get(iy), null);
+	    }
+	}
+    }
+   
+    // returns if finished dropping
+    public boolean dropOneLine(){
+	for(int iy=eraseLineList.get(0);iy<field.size();iy++){
+	    for(int ix=0;ix<10;ix++){
+		if(iy == field.size() - 1) {
+		    setFieldBlock(ix, iy, null);
+		} else {
+		    setFieldBlock(ix, iy, getFieldBlock(ix, iy + 1));
+		}
+	    }
+	}
+	eraseLineList.remove(0);
+	if(eraseLineList.size() == 0){
+	    return true;
+	} else {
+	    for(int i=0;i<eraseLineList.size();i++){
+		eraseLineList.set(i, eraseLineList.get(i) - 1);
+	    }
+	    return false;
+	}
     }
 }

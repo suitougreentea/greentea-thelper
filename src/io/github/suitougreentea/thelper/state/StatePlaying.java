@@ -20,12 +20,12 @@ public class StatePlaying extends BasicGameState {
     private GameField field;
 
     private int timer;
-    private final int TIMER_READY = 60;
-    private final int TIMER_GO = 120;
+    private final int TIMER_READY = 10;
+    private final int TIMER_GO = 10;
     private final int TIMER_WAITFORSPAWN = 0;
-    private final int TIMER_WAITFORERASE = 60;
-    private final int TIMER_WAITFORFALL = 60;
-    private final int TIMER_AFTERFALLING = 60;
+    private final int TIMER_WAITFORERASE = 0;
+    private final int TIMER_WAITFORFALL = 0;
+    private final int TIMER_AFTERFALLING = 0;
     private boolean readyGo = true;
 
     private static final int PHASE_WAITFORSPAWN = 0;
@@ -47,9 +47,12 @@ public class StatePlaying extends BasicGameState {
 
     private int moveDirection = 0;
     private int firstMoveTimer = 0;
-    private int TIMER_FIRSTMOVE = 10;
+    private int TIMER_FIRSTMOVE = 5;
     private float moveCounter = 0;
-    private float MOVE_DELTA = 0.2f;
+    private float MOVE_DELTA = 0.5f;
+    
+    private float dropLineCounter = 0;
+    private float DROPLINE_DELTA = 4;
 
     public StatePlaying(int i) {
 	this.stateId = i;
@@ -64,7 +67,7 @@ public class StatePlaying extends BasicGameState {
     @Override
     public void enter(GameContainer gc, StateBasedGame sbg)
 	    throws SlickException {
-	field = new GameField(20);
+	field = new GameField(30);
     }
 
     @Override
@@ -92,6 +95,44 @@ public class StatePlaying extends BasicGameState {
 		timer ++;
 	    }
 	} else {
+	    if(i.isKeyPressed(Input.KEY_LEFT)){
+		if(field.moveLeft()) lockdownTimer = 0;
+		moveDirection = -1;
+		firstMoveTimer = 0;
+		moveCounter = 0;
+	    }
+	    if(i.isKeyPressed(Input.KEY_RIGHT)){
+		if(field.moveRight()) lockdownTimer = 0;
+		moveDirection = 1;
+		firstMoveTimer = 0;
+		moveCounter = 0;
+	    }
+	    if(i.isKeyDown(Input.KEY_LEFT)) {
+		if(moveDirection == -1) {
+		    if(firstMoveTimer == TIMER_FIRSTMOVE){
+			moveCounter += MOVE_DELTA;
+			while(moveCounter >= 1) {
+			    if(field.moveLeft()) lockdownTimer = 0;
+			    moveCounter -= 1;
+			}
+		    } else {
+			firstMoveTimer++;
+		    }
+		}
+	    }
+	    if(i.isKeyDown(Input.KEY_RIGHT)) {
+		if(moveDirection == 1) {
+		    if(firstMoveTimer == TIMER_FIRSTMOVE){
+			moveCounter += MOVE_DELTA;
+			while(moveCounter >= 1) {
+			    if(field.moveRight()) lockdownTimer = 0;
+			    moveCounter -= 1;
+			}
+		    } else {
+			firstMoveTimer++;
+		    }
+		}
+	    }
 	    switchhead:
 		switch(phase) {
 		case PHASE_WAITFORSPAWN:
@@ -110,44 +151,6 @@ public class StatePlaying extends BasicGameState {
 		    timer++;
 		    break;
 		case PHASE_CONTROLLING:
-		    if(i.isKeyPressed(Input.KEY_LEFT)){
-			if(field.moveLeft()) lockdownTimer = 0;
-			moveDirection = -1;
-			firstMoveTimer = 0;
-			moveCounter = 0;
-		    }
-		    if(i.isKeyPressed(Input.KEY_RIGHT)){
-			if(field.moveRight()) lockdownTimer = 0;
-			moveDirection = 1;
-			firstMoveTimer = 0;
-			moveCounter = 0;
-		    }
-		    if(i.isKeyDown(Input.KEY_LEFT)) {
-			if(moveDirection == -1) {
-			    if(firstMoveTimer == TIMER_FIRSTMOVE){
-				moveCounter += MOVE_DELTA;
-				while(moveCounter >= 1) {
-				    if(field.moveLeft()) lockdownTimer = 0;
-				    moveCounter -= 1;
-				}
-			    } else {
-				firstMoveTimer++;
-			    }
-			}
-		    }
-		    if(i.isKeyDown(Input.KEY_RIGHT)) {
-			if(moveDirection == 1) {
-			    if(firstMoveTimer == TIMER_FIRSTMOVE){
-				moveCounter += MOVE_DELTA;
-				while(moveCounter >= 1) {
-				    if(field.moveRight()) lockdownTimer = 0;
-				    moveCounter -= 1;
-				}
-			    } else {
-				firstMoveTimer++;
-			    }
-			}
-		    }
 		    if(i.isKeyDown(Input.KEY_DOWN)){
 			softDropCounter += SOFTDROP_DELTA;
 			while(softDropCounter >= 1) {
@@ -158,7 +161,11 @@ public class StatePlaying extends BasicGameState {
 		    if(i.isKeyPressed(Input.KEY_UP)) {
 			field.hardDrop();
 			timer = 0;
-			phase = PHASE_WAITFORSPAWN;
+			if(field.judgeEraseLine().size() == 0) {
+			    phase = PHASE_WAITFORSPAWN;
+			} else {
+			    phase = PHASE_WAITFORERASE;
+			}
 			break switchhead;
 		    }
 		    if(i.isKeyPressed(Input.KEY_X)) {
@@ -182,7 +189,11 @@ public class StatePlaying extends BasicGameState {
 			if(lockdownTimer == TIMER_LOCKDOWN || forceLockdownTimer == TIMER_FORCELOCKDOWN) {
 			    field.hardDrop();
 			    timer = 0;
-			    phase = PHASE_WAITFORSPAWN;
+			    if(field.judgeEraseLine().size() == 0) {
+				phase = PHASE_WAITFORSPAWN;
+			    } else {
+				phase = PHASE_WAITFORERASE;
+			    }
 			    break switchhead;
 			}
 			lockdownTimer++;
@@ -194,6 +205,7 @@ public class StatePlaying extends BasicGameState {
 		    if(timer == TIMER_WAITFORERASE) {
 			timer = 0;
 			phase = PHASE_WAITFORFALL;
+			field.eraseLine();
 			break switchhead;
 		    }
 		    timer++;
@@ -207,6 +219,16 @@ public class StatePlaying extends BasicGameState {
 		    timer++;
 		    break;
 		case PHASE_FALLING:
+		    dropLineCounter += DROPLINE_DELTA;
+		    while(dropLineCounter >= 1) {
+			if(field.dropOneLine()){
+			    timer = 0;
+			    phase = PHASE_AFTERFALLING;
+			    dropLineCounter = 0;
+			    break switchhead;
+			}
+			dropLineCounter -= 1;
+		    }
 		    break;
 		case PHASE_AFTERFALLING:
 		    if(timer == TIMER_AFTERFALLING) {
@@ -237,7 +259,7 @@ public class StatePlaying extends BasicGameState {
 	g.popTransform();
 	g.drawString(
 		String.format(
-			"Phase: %d\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f",
+			"Phase: %d\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f\nDrop: %f",
 			phase,
 			timer,
 			fallCounter,
@@ -246,7 +268,8 @@ public class StatePlaying extends BasicGameState {
 			forceLockdownTimer,
 			moveDirection,
 			firstMoveTimer,
-			moveCounter
+			moveCounter,
+			dropLineCounter
 			), 480, 0);
     }
 
