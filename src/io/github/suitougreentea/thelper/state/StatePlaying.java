@@ -16,13 +16,45 @@ import org.newdawn.slick.state.StateBasedGame;
 public class StatePlaying extends BasicGameState {
 
     private int stateId; 
-    
+
     private GameField field;
-    
+
+    private int timer;
+    private final int TIMER_READY = 60;
+    private final int TIMER_GO = 120;
+    private final int TIMER_WAITFORSPAWN = 0;
+    private final int TIMER_WAITFORERASE = 60;
+    private final int TIMER_WAITFORFALL = 60;
+    private final int TIMER_AFTERFALLING = 60;
+    private boolean readyGo = true;
+
+    private static final int PHASE_WAITFORSPAWN = 0;
+    private static final int PHASE_CONTROLLING = 1;
+    private static final int PHASE_WAITFORERASE = 2;
+    private static final int PHASE_WAITFORFALL = 3;
+    private static final int PHASE_FALLING = 4;
+    private static final int PHASE_AFTERFALLING = 5;
+    private int phase = 1;
+
+    private float fallCounter = 0;
+    private float FALL_DELTA = 1/60f;
+    private float softDropCounter = 0;
+    private float SOFTDROP_DELTA = 1;
+    private int lockdownTimer = 0;
+    private int TIMER_LOCKDOWN = 60;
+    private int forceLockdownTimer = 0;
+    private int TIMER_FORCELOCKDOWN = 180;
+
+    private int moveDirection = 0;
+    private int firstMoveTimer = 0;
+    private int TIMER_FIRSTMOVE = 10;
+    private float moveCounter = 0;
+    private float MOVE_DELTA = 0.2f;
+
     public StatePlaying(int i) {
 	this.stateId = i;
     }
-    
+
     @Override
     public void init(GameContainer gc, StateBasedGame sbg)
 	    throws SlickException {
@@ -39,7 +71,7 @@ public class StatePlaying extends BasicGameState {
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g)
 	    throws SlickException {
 	Resource.field.draw();
-	
+
 	drawField(field, g);
 	for(int i=0;i<6;i++){
 	    drawNext(i);
@@ -50,12 +82,142 @@ public class StatePlaying extends BasicGameState {
     public void update(GameContainer gc, StateBasedGame sbg, int delta)
 	    throws SlickException {
 	Input i = gc.getInput();
-	if(i.isKeyPressed(Input.KEY_LEFT)) field.moveLeft();
-	if(i.isKeyPressed(Input.KEY_RIGHT)) field.moveRight();
-	if(i.isKeyPressed(Input.KEY_DOWN)) field.moveDown();
-	if(i.isKeyPressed(Input.KEY_UP)) field.hardDrop();
-	if(i.isKeyPressed(Input.KEY_X)) field.rotateCW();
-	if(i.isKeyPressed(Input.KEY_Z)) field.rotateCCW();
+	if(readyGo){
+	    if(timer == 0) System.out.println("ready");
+	    if(timer == TIMER_READY) System.out.println("go");
+	    if(timer == TIMER_GO){
+		timer = 0;
+		readyGo = false;
+	    } else {
+		timer ++;
+	    }
+	} else {
+	    switchhead:
+		switch(phase) {
+		case PHASE_WAITFORSPAWN:
+		    if(timer == TIMER_WAITFORSPAWN) {
+			timer = 0;
+			phase = PHASE_CONTROLLING;
+
+			field.newMino();
+			fallCounter = 0;
+			softDropCounter = 0;
+			lockdownTimer = 0;
+			forceLockdownTimer = 0;
+			
+			break switchhead;
+		    }
+		    timer++;
+		    break;
+		case PHASE_CONTROLLING:
+		    if(i.isKeyPressed(Input.KEY_LEFT)){
+			if(field.moveLeft()) lockdownTimer = 0;
+			moveDirection = -1;
+			firstMoveTimer = 0;
+			moveCounter = 0;
+		    }
+		    if(i.isKeyPressed(Input.KEY_RIGHT)){
+			if(field.moveRight()) lockdownTimer = 0;
+			moveDirection = 1;
+			firstMoveTimer = 0;
+			moveCounter = 0;
+		    }
+		    if(i.isKeyDown(Input.KEY_LEFT)) {
+			if(moveDirection == -1) {
+			    if(firstMoveTimer == TIMER_FIRSTMOVE){
+				moveCounter += MOVE_DELTA;
+				while(moveCounter >= 1) {
+				    if(field.moveLeft()) lockdownTimer = 0;
+				    moveCounter -= 1;
+				}
+			    } else {
+				firstMoveTimer++;
+			    }
+			}
+		    }
+		    if(i.isKeyDown(Input.KEY_RIGHT)) {
+			if(moveDirection == 1) {
+			    if(firstMoveTimer == TIMER_FIRSTMOVE){
+				moveCounter += MOVE_DELTA;
+				while(moveCounter >= 1) {
+				    if(field.moveRight()) lockdownTimer = 0;
+				    moveCounter -= 1;
+				}
+			    } else {
+				firstMoveTimer++;
+			    }
+			}
+		    }
+		    if(i.isKeyDown(Input.KEY_DOWN)){
+			softDropCounter += SOFTDROP_DELTA;
+			while(softDropCounter >= 1) {
+			    field.moveDown();
+			    softDropCounter -= 1;
+			}
+		    }
+		    if(i.isKeyPressed(Input.KEY_UP)) {
+			field.hardDrop();
+			timer = 0;
+			phase = PHASE_WAITFORSPAWN;
+			break switchhead;
+		    }
+		    if(i.isKeyPressed(Input.KEY_X)) {
+			field.rotateCW();
+			lockdownTimer = 0;
+		    }
+		    if(i.isKeyPressed(Input.KEY_Z)) {
+			field.rotateCCW();
+			lockdownTimer = 0;
+		    }
+
+		    // freefall
+		    fallCounter += FALL_DELTA;
+		    while(fallCounter >= 1) {
+			field.moveDown();
+			fallCounter -= 1;
+		    }
+
+		    // lockdown
+		    if(field.getCurrentMinoY() == field.getGhostY()) {
+			if(lockdownTimer == TIMER_LOCKDOWN || forceLockdownTimer == TIMER_FORCELOCKDOWN) {
+			    field.hardDrop();
+			    timer = 0;
+			    phase = PHASE_WAITFORSPAWN;
+			    break switchhead;
+			}
+			lockdownTimer++;
+			forceLockdownTimer++;
+		    }
+
+		    break;
+		case PHASE_WAITFORERASE:
+		    if(timer == TIMER_WAITFORERASE) {
+			timer = 0;
+			phase = PHASE_WAITFORFALL;
+			break switchhead;
+		    }
+		    timer++;
+		    break;
+		case PHASE_WAITFORFALL:
+		    if(timer == TIMER_WAITFORFALL) {
+			timer = 0;
+			phase = PHASE_FALLING;
+			break switchhead;
+		    }
+		    timer++;
+		    break;
+		case PHASE_FALLING:
+		    break;
+		case PHASE_AFTERFALLING:
+		    if(timer == TIMER_AFTERFALLING) {
+			timer = 0;
+			phase = PHASE_WAITFORSPAWN;
+			break switchhead;
+		    }
+		    timer++;
+		    break;
+		}
+	}
 	i.clearKeyPressedRecord();
     }
 
@@ -63,20 +225,38 @@ public class StatePlaying extends BasicGameState {
     public int getID() {
 	return stateId;
     }
-   
+
     private void drawField(GameField field, Graphics g){
 	g.pushTransform();
 	g.translate(100, 100);
 	CommonRenderHelper.drawField(field.getField());
-	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX() * 20, -field.getCurrentMinoY() * 20 + 380, 0);
-	CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX() * 20, -field.getGhostY() * 20 + 380, 0, 0.5f);
+	if(phase == PHASE_CONTROLLING) {
+	    CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX() * 20, -field.getCurrentMinoY() * 20 + 380, 0);
+	    CommonRenderHelper.drawMino(field.getCurrentMino(), field.getCurrentMinoX() * 20, -field.getGhostY() * 20 + 380, 0, 0.5f);
+	}
 	g.popTransform();
+	g.drawString(
+		String.format(
+			"Phase: %d\nTimer: %d\nFall: %f\nSoft: %f\nLock: %d\nForce: %d\nDirection: %d\nFirstMove: %d\nMove: %f",
+			phase,
+			timer,
+			fallCounter,
+			softDropCounter,
+			lockdownTimer,
+			forceLockdownTimer,
+			moveDirection,
+			firstMoveTimer,
+			moveCounter
+			), 480, 0);
     }
-    
+
     private void drawNext(int index){
 	Mino mino = field.getNextMino(index);
 	/* offset */
 	CommonRenderHelper.drawMino(mino, 0, 48 * index + 48, 1);
     }
-	    
+
+    private void afterDrop() {
+    }
+
 }

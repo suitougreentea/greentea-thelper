@@ -71,14 +71,22 @@ public class GameField {
         this.currentMinoY = currentMinoY;
     }
     
-    public void moveRight(){
+    public boolean moveRight(){
 	currentMinoX ++;
-	if(checkHit()) currentMinoX--;
+	if(checkHit()) {
+	    currentMinoX--;
+	    return false;
+	}
+	return true;
     }
 
-    public void moveLeft(){
+    public boolean moveLeft(){
 	currentMinoX --;
-	if(checkHit()) currentMinoX++;
+	if(checkHit()) {
+	    currentMinoX++;
+	    return false;
+	}
+	return true;
     }
 
     public void moveUp(){
@@ -131,8 +139,6 @@ public class GameField {
 		}
 	    }
 	}
-	
-	newMino();
     }
     
     public void newMino(){
