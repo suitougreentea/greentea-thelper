@@ -6,7 +6,6 @@ import io.github.suitougreentea.thelper.Mino;
 import io.github.suitougreentea.thelper.MinoRuleStandard;
 import io.github.suitougreentea.thelper.Resource;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
