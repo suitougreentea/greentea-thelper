@@ -23,7 +23,11 @@ public class BagRandomizer7 {
 	int i = 0;
 	while(true){
 	   if(!bag[i]){
-	       if(n == 0) return i;
+	       if(n == 0) {
+		   bag[i] = true;
+		   bagRemain--;
+		   return i;
+	       }
 	       n--;
 	   }
            i++;
