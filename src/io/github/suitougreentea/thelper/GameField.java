@@ -1,7 +1,5 @@
 package io.github.suitougreentea.thelper;
 
-import io.github.suitougreentea.thelper.state.MinoRuleStandard;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,6 +15,7 @@ public class GameField {
     private BagRandomizer7 randomizer = new BagRandomizer7(new Random());
     private MinoRuleStandard minoRule = new MinoRuleStandard();
     private List<Integer> eraseLineList;
+    private boolean alreadyHolded = false;
     
     public GameField(int defaultHeight){
 	if(defaultHeight < 20) defaultHeight = 20;
@@ -150,6 +149,7 @@ public class GameField {
 	for(int i=0;i<5;i++) nextMino[i] = nextMino[i+1];
 	int newMinoId = randomizer.next();
 	nextMino[5] = new Mino(newMinoId, minoRule.getColor(newMinoId), minoRule.getSpawnRotationState(newMinoId));
+	alreadyHolded = false;
     }
     
     public Mino getNextMino(int index){
@@ -199,5 +199,33 @@ public class GameField {
 	    }
 	    return false;
 	}
+    }
+    
+    public void hold(){
+	if(!alreadyHolded){
+	    if(holdMino == null){
+		int minoId = currentMino.getMinoId();
+		holdMino = new Mino(minoId, minoRule.getColor(minoId), minoRule.getSpawnRotationState(minoId));
+		newMino();
+	    } else {
+		int minoId = currentMino.getMinoId();
+		Mino temp = new Mino(minoId, minoRule.getColor(minoId), minoRule.getSpawnRotationState(minoId));
+		currentMino = holdMino;
+		holdMino = temp;
+
+                minoId = currentMino.getMinoId();
+                currentMinoX = minoRule.getSpawnPositionX(minoId);
+                currentMinoY = minoRule.getSpawnPositionY(minoId);
+	    }
+	    alreadyHolded = true;
+	}
+    }
+
+    public Mino getHoldMino() {
+        return holdMino;
+    }
+
+    public MinoRuleStandard getMinoRule() {
+        return minoRule;
     }
 }

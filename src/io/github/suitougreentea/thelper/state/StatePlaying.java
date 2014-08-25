@@ -3,6 +3,7 @@ package io.github.suitougreentea.thelper.state;
 import io.github.suitougreentea.thelper.CommonRenderHelper;
 import io.github.suitougreentea.thelper.GameField;
 import io.github.suitougreentea.thelper.Mino;
+import io.github.suitougreentea.thelper.MinoRuleStandard;
 import io.github.suitougreentea.thelper.Resource;
 
 import org.newdawn.slick.Color;
@@ -78,6 +79,15 @@ public class StatePlaying extends BasicGameState {
 	drawField(field, g);
 	for(int i=0;i<6;i++){
 	    drawNext(i);
+	}
+	
+	Mino holdMino = field.getHoldMino();
+	if(holdMino != null) {
+	    int minoId = holdMino.getMinoId();
+	    MinoRuleStandard minoRule = field.getMinoRule();
+	    int ox = (int) (minoRule.getOffsetX(minoId) * 16);
+	    int oy = (int) (minoRule.getOffsetY(minoId) * 16);
+	    CommonRenderHelper.drawMino(holdMino, 10 + ox, 220 + oy, 1);
 	}
     }
 
@@ -175,6 +185,13 @@ public class StatePlaying extends BasicGameState {
 		    if(i.isKeyPressed(Input.KEY_Z)) {
 			field.rotateCCW();
 			lockdownTimer = 0;
+		    }
+		    if(i.isKeyPressed(Input.KEY_C)) {
+			field.hold();
+			fallCounter = 0;
+			softDropCounter = 0;
+			lockdownTimer = 0;
+			forceLockdownTimer = 0;
 		    }
 
 		    // freefall
@@ -275,11 +292,28 @@ public class StatePlaying extends BasicGameState {
 
     private void drawNext(int index){
 	Mino mino = field.getNextMino(index);
-	/* offset */
-	CommonRenderHelper.drawMino(mino, 0, 48 * index + 48, 1);
+	int minoId = mino.getMinoId();
+	int x, y;
+	int s, size;
+	if(index == 0){
+	    x = 314;
+	    y = 220;
+	    size = 1;
+	    s = 16;
+	} else if(index == 1){
+	    x = 320;
+	    y = 282;
+	    size = 2;
+	    s = 14;
+	} else {
+	    x = 326;
+	    y = 336 + 58 * (index - 2);
+	    size = 3;
+	    s = 12;
+	}
+	MinoRuleStandard minoRule = field.getMinoRule();
+	int ox = (int) (minoRule.getOffsetX(minoId) * s);
+	int oy = (int) (minoRule.getOffsetY(minoId) * s);
+	CommonRenderHelper.drawMino(mino, x + ox, y + oy, size);
     }
-
-    private void afterDrop() {
-    }
-
 }

@@ -1,14 +1,14 @@
-package io.github.suitougreentea.thelper.state;
+package io.github.suitougreentea.thelper;
 
 public class MinoRuleStandard {
     private float[][] offset = {
-	    {0, 0},
-	    {0, 0},
-	    {0, 0},
-	    {0, 0},
-	    {0, 0},
-	    {0, 0},
-	    {0, 0}
+	    {0, -0.5f},
+	    {0.5f, -1},
+	    {0.5f, -1},
+	    {0, -1},
+	    {0.5f, -1},
+	    {0.5f, -1},
+	    {0.5f, -1}
     };
 
     private int[][] spawnPosition = {
